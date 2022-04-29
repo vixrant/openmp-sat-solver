@@ -3,7 +3,16 @@
 
 ### Abstract
 
-Herewithin lies an implementation of DPLL algorithm, with deduction steps of unit clause propagation and pure literal elimination implemented using OpenMPI. The aim of this project was to develop a SIMT-compatible algorithm to accelerate the deduction assignments in DPLL using GPGPUs. While parallelising state-space exploration is trivial, a bulk of the work is performed in finding unit clauses and pure literals. The most optimal algorithm for unit propagation is two-watched literals, which disables the solver from finding pure literals in an efficient manner. Therefore, my solver uses a matrix representation of input CNF formula and decomposes the input to multiple processors for partial deductions. The partial deductions are later reduced and then analysed to find unit clauses and pure literals.
+Herewithin lies an implementation of DPLL algorithm, with deduction steps of unit clause propagation implemented using OpenMP. The aim of this project was to develop a SIMT-compatible algorithm to accelerate the deduction assignments in DPLL using GPGPUs. While parallelising state-space exploration is trivial, a bulk of the work is performed in finding unit clauses. The most optimal algorithm for unit propagation is two-watched literals as proposed by Chaff solver.
+
+My solver uses a matrix representation of input CNF formula and decomposes the input to multiple threads for finding unit clauses, instead of using a lazy data structure. The idea is to find 2 unique, unassigned literals in a clause to prove that the clause is not a unit clause. Therefore, each thread returns its min and max unassigned literals. If such literals are found and unique, then the clause is not a unit clause. Or else the literal is set to the polarity that is present in that clause.
+
+### Technology used
+
+1. CMake for build system
+2. OpenMP for implementation
+
+The implementation can be transferred over to a GPGPU using OpenMP target offloading.
 
 ### Build Instructions
 
@@ -14,4 +23,12 @@ cmake . ..
 make
 ```
 
-This would give you `serialsat`, `test_serial`, `parallelsat`, `test_parallel`.
+This would give you `solver` program.
+
+### Test Instructions
+
+```
+./solver <path-to-cnf-file>
+```
+
+CNF files are present in `examples/` directory. `uf20-91` has 20 literals, 91 clauses, all SAT. `uuf50.218.1000` has 218 literals, 1000 clauses, all UNSAT.
