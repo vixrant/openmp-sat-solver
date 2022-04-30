@@ -1,33 +1,26 @@
-#ifndef _MODEL_HH_
-#define _MODEL_HH_
+#ifndef _MODEL_HH
+#define _MODEL_HH
 
-#include <cstring>
+#include <boost/dynamic_bitset.hpp>
+
+using boost::dynamic_bitset;
 
 /**
- * General class of SAT interpretation
+ * Represents an interpretation
  */
 struct Model {
-    bool* pos; 
-    bool* neg; 
+    dynamic_bitset<> pos;
+    dynamic_bitset<> neg;
     int numv;
 
-    Model(int numv): numv(numv) {
-        pos = new bool[numv];
-        neg = new bool[numv];
-        memset(pos, 0, sizeof(bool) * numv);
-        memset(neg, 0, sizeof(bool) * numv);
-    } 
+    Model(int nv): pos(nv), neg(nv), numv(nv) {};
+    Model(const Model& b): pos(b.pos), neg(b.neg), numv(b.numv) {};
 
-    ~Model() {
-        delete pos;
-        delete neg;
-    }
-
-    int initModel(int numv);
-    int set(int v, int p);
-    int reset(int v);
     int get(int v);
+    void reset(int v);
+    void set(int v, int p);
     bool isConflict();
+    void print();
 };
 
 #endif

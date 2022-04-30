@@ -1,9 +1,11 @@
 #ifndef _PARSER_HH_
 #define _PARSER_HH_
 
-#include <fstream>
+#include <memory>
 #include "instance.hh"
 
-void parse_dimacs(std::ifstream&, Instance&);
+using std::shared_ptr;
+
+shared_ptr<Instance> parse_dimacs(const char* fname);
 
 #endif

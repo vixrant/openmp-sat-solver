@@ -1,39 +1,41 @@
 #include "model.hh"
+#include <iostream>
+#include <iomanip>
 
-int Model::initModel(int nv) {
-    numv = nv;
-    pos = new bool[nv];
-    if(pos == 0) return -1;
-    neg = new bool[nv];
-    if(neg == 0) return -1;
+using namespace std;
+
+int Model::get(int v)
+{
+    if (pos[v])
+        return +1;
+    if (neg[v])
+        return -1;
     return 0;
 }
 
-int Model::set(int v, int p) {
-    if(v >= numv) return -1;
-    if(p == +1) pos[v] = 1;
-    else neg[v] = 1;
-    return 0;
+void Model::reset(int v)
+{
+    pos.set(v, false);
+    neg.set(v, false);
 }
 
-int Model::reset(int v) {
-    if(v >= numv) return -1;
-    pos[v] = 0;
-    neg[v] = 0;
-    return 0;
+void Model::set(int v, int p)
+{
+    if (p == +1)
+        pos.set(v);
+    else if (p == -1)
+        neg.set(v);
 }
 
-int Model::get(int v) {
-    if(v >= numv) return -1;
-    if(pos[v] == 1) return 1;
-    else return -1;
+bool Model::isConflict()
+{
+    return (pos & neg).any();
 }
 
-bool Model::isConflict() {
-    for(int v = 0; v < numv; v++) {
-        if(pos[v] && neg[v]) {
-            return 1;
-        }
+void Model::print() {
+    for (int v = 0; v < numv; v++)
+    {
+        cout << setfill(' ') << setw(2) << get(v) << " ";
     }
-    return 0;
+    cout << endl;
 }

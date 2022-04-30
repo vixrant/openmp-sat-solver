@@ -10,11 +10,14 @@ My solver uses a matrix representation of input CNF formula and decomposes the i
 ### Technology used
 
 1. CMake for build system
-2. OpenMP for implementation
+2. OpenMP for multithreading
+3. Boost C++ libraries for data structures
 
 The implementation can be transferred over to a GPGPU using OpenMP target offloading.
 
 ### Build Instructions
+
+> PLEASE MAKE SURE BOOST IS INSTALLED ON SYSTEM!
 
 ```
 mkdir build

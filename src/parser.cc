@@ -1,15 +1,17 @@
-#include "parser.hh"
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <sstream>
 #include <vector>
+#include "parser.hh"
 
 using namespace std;
 
-void parse_dimacs(ifstream& f, Instance& i) {
+shared_ptr<Instance> parse_dimacs(const char* fname) {
+    ifstream f(fname);
+    shared_ptr<Instance> i = nullptr;
     int numc, numv;
     int clause = 0;
-    vector< vector<int> > clauses;
 
     string line;
     while(getline(f, line)) {
@@ -30,7 +32,7 @@ void parse_dimacs(ifstream& f, Instance& i) {
             lstream >> stok;
             lstream >> numv;
             lstream >> numc;
-            i.initProblem(numc, numv);
+            i = make_shared<Instance>(numc, numv);
             continue;
         }
 
@@ -41,15 +43,17 @@ void parse_dimacs(ifstream& f, Instance& i) {
 
         // clause
         itok = stoi(stok);
-        i.addDimacsLiteral(clause, itok);
+        i->addDimacsLiteral(clause, itok);
         while(lstream >> itok) {
             if(itok == 0) {
                 break;
             }
-            i.addDimacsLiteral(clause, itok);
+            i->addDimacsLiteral(clause, itok);
         }
 
         // increment clause id
         clause++;
     }
+
+    return i;
 }

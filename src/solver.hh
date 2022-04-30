@@ -1,7 +1,8 @@
 #ifndef _SOLVER_HH_
 #define _SOLVER_HH_
 
-#include <memory>
+#include "instance.hh"
+#include "model.hh"
 
 /**
  * Represents status of internal computations
@@ -26,6 +27,6 @@ enum Status {
  * The function returns 0 if no satisfying
  * interpretation could be found for the SAT instance.
  */
-std::shared_ptr<int> solve(Instance &);
+std::shared_ptr<Model> solve(Instance &);
 
 #endif
