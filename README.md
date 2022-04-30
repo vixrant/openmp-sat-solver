@@ -20,21 +20,39 @@ The implementation can be transferred over to a GPGPU using OpenMP target offloa
 
 > PLEASE MAKE SURE BOOST, OPENMP, AND CMAKE ARE INSTALLED ON SYSTEM!
 
-#### Parallel Implementation
-
-```
+```sh
 mkdir build
 cd build
 cmake . ..
 make
 ```
 
-This would give you `solver` program.
+This would give you `serial_solver`, `row_parallel_solver`, and `col_parallel_solver` programs.
+
+CMakeLists file contains a target for `block_parallel_solver`, however, due to implementation issues, it is commented out.
 
 ### Test Instructions
 
-```
-./solver <path-to-cnf-file>
+You can run a single file by:
+```sh
+./X_solver --input-file <path-to-cnf-file>
 ```
 
-CNF files are present in `examples/` directory. `uf20-91` has 20 literals, 91 clauses, all SAT. `uuf50.218.1000` has 218 literals, 1000 clauses, all UNSAT.
+You can test an entire directory of CNF files by:
+```sh
+./X_solver --test-dir <path-to-cnf-directory>
+```
+
+### Benchmarks
+
+CNF files are present in `examples/` directory.
+
+1. `uf20-91` has 20 literals, 91 clauses, 1000 files, all SAT (T). Use this benchmark to check for correctness.
+2. `uf50-218`, `uuf50-218` has 50 literals, 218 clauses, 1000 files, all SAT (T) and UNSAT (F) respectively. Use these benchmarks for performance information on 3-SAT problems.
+
+Source: https://www.cs.ubc.ca/~hoos/SATLIB/benchm.html
+
+1. `T_quinn.cnf` and `T_simple_v3_c2.cnf` are small CNF files that can be ran for testing. They are both SAT (T).
+2. `benchmarks/` contains more difficult tests that may take some time to finish. Run them if you are ok with waiting.
+
+Source: https://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html
