@@ -12,7 +12,7 @@ using boost::dynamic_bitset;
 struct Instance {
     dynamic_bitset<> pos;
     dynamic_bitset<> neg;
-    int numc, numv;
+    const int numc, numv;
 
 
     Instance(int nc, int nv):

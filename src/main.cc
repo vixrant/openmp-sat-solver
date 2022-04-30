@@ -16,7 +16,7 @@ int runFile(string fname)
     auto i = parse_dimacs(fname.c_str());
     D({
         cout << "Input formula:" << endl;
-        i->print()
+        i->print();
     });
 
     auto m = solve(*i);

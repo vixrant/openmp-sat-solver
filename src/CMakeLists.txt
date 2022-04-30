@@ -20,4 +20,7 @@ target_include_directories(solver
 
 target_link_libraries(solver PRIVATE OpenMP::OpenMP_CXX ${Boost_LIBRARIES})
 
-target_compile_definitions(solver PUBLIC PRINT_LOGS=1)
+if(PRINT_LOGS)
+  target_compile_definitions(solver PRIVATE PRINT_LOGS=1)
+endif(PRINT_LOGS)
+

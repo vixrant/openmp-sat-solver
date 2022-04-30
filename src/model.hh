@@ -11,7 +11,7 @@ using boost::dynamic_bitset;
 struct Model {
     dynamic_bitset<> pos;
     dynamic_bitset<> neg;
-    int numv;
+    const int numv;
 
     Model(int nv): pos(nv), neg(nv), numv(nv) {};
     Model(const Model& b): pos(b.pos), neg(b.neg), numv(b.numv) {};

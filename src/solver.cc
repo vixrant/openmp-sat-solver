@@ -1,5 +1,6 @@
 #include <memory>
 #include <iostream>
+#include <algorithm>
 #include <omp.h>
 #include "solver.hh"
 #include "instance.hh"
@@ -7,65 +8,69 @@
 
 using namespace std;
 
-Status _bcp(Instance& i, Model& m) {
-    bool change;
-    bool allsat;
-    do {
-        // If no change is performed in this iteration, there will not be another iteration
-        change = 0;
-        // Assume all clauses are SAT, unless found otherwise
-        allsat = 1;
+Status _bcp
+(Instance &i, Model &m)
+{
+    bool change; // Loop when model changes
 
-        for(int c = 0; c < i.numc; c++) {
-            int sat, min, max;
+    do
+    {
+        change = 0; // If no change is performed in this iteration, there will not be another iteration
 
-            sat = 0; // Flag clause as not SAT
-            min = i.numv; // Set min unassigned to upper out bound
-            max = -1; // Set max unassigned to lower out bound
+        bool allsat = 1;    // Assume all clauses are SAT, unless found otherwise
+        bool roadblock = 0; // No assignable variables for a clause
 
-            for(int v = 0; v < i.numv; v++) {
-                int pol, assgn;
+        #pragma omp parallel for shared(i, m, change) reduction(&&: allsat) reduction(||: roadblock) num_threads(i.numc)
+        for (int c = 0; c < i.numc; c++)
+        {
+            bool sat = 0;      // Flag clause as not SAT
+            int minv = i.numv; // Set min unassigned to upper out bound
+            int maxv = -1;     // Set max unassigned to lower out bound
 
+            // #pragma omp parallel for shared(i, m) reduction(||: sat) reduction(min: minv) reduction(max: maxv) num_threads(i.numv)
+            for (int v = 0; v < i.numv; v++)
+            {
                 // Polarity in clause
-                pol = i.get(c, v);
-
+                int pol = i.get(c, v);
                 // Literal absent from clause
-                if(pol == 0) {
+                if (pol == 0)
+                {
                     continue;
                 }
 
                 // Assignment of literal
-                assgn = m.get(v);
-
+                int assgn = m.get(v);
                 // Unassigned literal, add to min or max
-                if(m.get(v) == 0) {
-                    min = min < v ? min : v;
-                    max = max > v ? max: v;
+                if (m.get(v) == 0)
+                {
+                    minv = min(minv, v);
+                    maxv = max(maxv, v);
                 }
                 // Assigned literal, check if it satisfies clause
-                else {
-                    if(pol == assgn) {
-                        sat = 1;
-                    }
+                else if (pol == assgn)
+                {
+                    sat = 1;
                 }
-            }
+            } // end of min, max, sat search
 
             // Add clause's status to status of formula
             allsat &= sat;
 
-            // Clause is unsat 
-            if(!sat) {
+            // Clause is unsat
+            if (!sat)
+            {
                 // No unassigned literals, so we break out
-                if(max == -1) {
-                    return UNSAT;
+                if (maxv == -1)
+                {
+                    roadblock = 1;
                 }
-
                 // Check if it is a unit clause
-                if(min == max) {
+                else if (minv == maxv)
+                {
                     // Assign unit clause's literal
-                    int p = i.get(c, max);
-                    D(cout << "Unit clause: " << c << " setting " << max << " to " << p << endl);
-                    m.set(max, p);
+                    int p = i.get(c, maxv);
+                    D(cout << "Unit clause: " << c << " setting " << maxv << " to " << p << endl);
+                    m.set(maxv, p);
                     // Go on with another iteration
                     change = 1;
                 }
@@ -76,6 +81,12 @@ Status _bcp(Instance& i, Model& m) {
         if(allsat) {
             D(cout << "All sat" << endl);
             return SAT;
+        }
+
+        // Check if an UNSAT clause has no variables left to assign
+        if(roadblock) {
+            D(cout << "UNSAT clause" << endl);
+            return UNSAT;
         }
 
         // Check conflict
@@ -89,18 +100,23 @@ Status _bcp(Instance& i, Model& m) {
         }
 
         // No conflicts, so continue to next iteration
-    } while(change);
+    } while (change);
 
     // Formula is neither SAT nor UNSAT
     return UNKNOWN;
 }
 
-shared_ptr<Model> _solve_util(Instance& i, Model* prevm, int guessPtr) {
+shared_ptr<Model> _solve_util
+(Instance &i, Model *prevm, int guessPtr)
+{
     // Copy model
     shared_ptr<Model> m;
-    if(prevm) {
+    if (prevm)
+    {
         m = make_shared<Model>(*prevm);
-    } else {
+    }
+    else
+    {
         m = make_shared<Model>(i.numv);
     }
 
@@ -108,24 +124,28 @@ shared_ptr<Model> _solve_util(Instance& i, Model* prevm, int guessPtr) {
     auto status = _bcp(i, *m);
 
     // If unit propagate solved instance, return model
-    if(status == SAT) {
+    if (status == SAT)
+    {
         return m;
     }
 
     // If unit propagate found conflict, return nullptr
-    if(status == UNSAT) {
+    if (status == UNSAT)
+    {
         return nullptr;
     }
 
     // Check if guess pointer literal has been assigned
     // If yes, check next literal to guess
-    while(guessPtr < i.numv && m->get(guessPtr) != 0) {
+    while (guessPtr < i.numv && m->get(guessPtr) != 0)
+    {
         guessPtr++;
     }
 
     // Check if all literals have been assigned
     // Then we cannot deduce anything
-    if(guessPtr == i.numv) {
+    if (guessPtr == i.numv)
+    {
         return nullptr;
     }
 
@@ -138,7 +158,8 @@ shared_ptr<Model> _solve_util(Instance& i, Model* prevm, int guessPtr) {
     });
     auto mT = _solve_util(i, m.get(), guessPtr + 1);
     // Return SAT only if SAT
-    if(mT) return mT;
+    if (mT)
+        return mT;
 
     // Guess -> F
     D(cout << "Guess " << guessPtr << " -> F" << endl);
@@ -155,7 +176,9 @@ shared_ptr<Model> _solve_util(Instance& i, Model* prevm, int guessPtr) {
 
 //////////////////////////////////////////////////////////////////////
 
-shared_ptr<Model> solve(Instance& i) {
+shared_ptr<Model> solve
+(Instance &i)
+{
     // Pass it to solver with initial guess pointer as 0
     return _solve_util(i, 0, 0);
 };
