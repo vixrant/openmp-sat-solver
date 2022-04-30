@@ -1,5 +1,6 @@
 # Parallel unit propagation and pure literal elimination
 ## CS 525: Parallel Computing, Purdue Spring '22.
+https://github.com/vixrant/parallel-sat-solver
 
 ### Abstract
 
