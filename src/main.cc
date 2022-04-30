@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
+#include <chrono>
 #include "parser.hh"
 #include "solver.hh"
 #include "verify.hh"
@@ -11,7 +12,7 @@
 using namespace std;
 namespace po = boost::program_options;
 
-int runFile(string fname)
+inline int runFile(string fname)
 {
     auto i = parse_dimacs(fname.c_str());
     D({
@@ -47,15 +48,25 @@ void runDir(string dname)
         {
             continue;
         }
-        int status = runFile(entry.path().c_str());
 
-        cout << entry.path().filename().string() << "\t";
+        auto i = parse_dimacs(entry.path().c_str());
+        auto start = chrono::steady_clock::now();
+        auto m = solve(*i);
+        auto end = chrono::steady_clock::now();
+        int status = m == nullptr ? 0 : +1;
+        if(m != nullptr && !verify(*i, *m)) {
+            status = -1;
+        }
+
+        cout << entry.path().filename().string() << ",";
         if (status == 1)
-            cout << "T" << endl;
+            cout << "T";
         else if (status == 0)
-            cout << "F" << endl;
+            cout << "F";
         else
-            cout << "Incorrect Model" << endl;
+            cout << "Incorrect Model";
+
+        cout << "," << chrono::duration_cast<chrono::milliseconds>(end - start).count() << endl;
     }
 }
 
