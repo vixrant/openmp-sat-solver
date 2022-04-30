@@ -17,7 +17,9 @@ The implementation can be transferred over to a GPGPU using OpenMP target offloa
 
 ### Build Instructions
 
-> PLEASE MAKE SURE BOOST IS INSTALLED ON SYSTEM!
+> PLEASE MAKE SURE BOOST, OPENMP, AND CMAKE ARE INSTALLED ON SYSTEM!
+
+#### Parallel Implementation
 
 ```
 mkdir build

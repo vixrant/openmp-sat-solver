@@ -20,14 +20,27 @@ Status _bcp
         bool allsat = 1;    // Assume all clauses are SAT, unless found otherwise
         bool roadblock = 0; // No assignable variables for a clause
 
-        #pragma omp parallel for shared(i, m, change) reduction(&&: allsat) reduction(||: roadblock) num_threads(i.numc)
+        #pragma omp parallel \
+            for \
+            if(ROW_STRIP == 1) \
+            shared(i, m, change) \
+            reduction(&&: allsat) \
+            reduction(||: roadblock) \
+            num_threads(i.numc)
         for (int c = 0; c < i.numc; c++)
         {
             bool sat = 0;      // Flag clause as not SAT
             int minv = i.numv; // Set min unassigned to upper out bound
             int maxv = -1;     // Set max unassigned to lower out bound
 
-            // #pragma omp parallel for shared(i, m) reduction(||: sat) reduction(min: minv) reduction(max: maxv) num_threads(i.numv)
+            #pragma omp parallel \
+                for \
+                if(COL_STRIP == 1) \
+                shared(i, m) \
+                reduction(||: sat) \
+                reduction(min: minv) \
+                reduction(max: maxv) \
+                num_threads(i.numv)
             for (int v = 0; v < i.numv; v++)
             {
                 // Polarity in clause
