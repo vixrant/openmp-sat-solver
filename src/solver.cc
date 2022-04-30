@@ -25,8 +25,7 @@ Status _bcp
             if(ROW_STRIP == 1) \
             shared(i, m, change) \
             reduction(&&: allsat) \
-            reduction(||: roadblock) \
-            num_threads(i.numc)
+            reduction(||: roadblock)
         for (int c = 0; c < i.numc; c++)
         {
             bool sat = 0;      // Flag clause as not SAT
@@ -39,8 +38,7 @@ Status _bcp
                 shared(i, m) \
                 reduction(||: sat) \
                 reduction(min: minv) \
-                reduction(max: maxv) \
-                num_threads(i.numv)
+                reduction(max: maxv)
             for (int v = 0; v < i.numv; v++)
             {
                 // Polarity in clause
