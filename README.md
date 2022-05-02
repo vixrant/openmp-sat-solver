@@ -36,6 +36,10 @@ Some other options for CMake include `-DPRINT_LOGS=1` which tells you the step t
 
 ### Test Instructions
 
+```sh
+./X_solver --help
+```
+
 You can run a single file by:
 ```sh
 ./X_solver --input-file <path-to-cnf-file>
@@ -50,15 +54,15 @@ You can test an entire directory of CNF files by:
 
 CNF files are present in `examples/` directory.
 
-#### Quick 5 second tests:
+#### Quick testing to check if program runs:
 
-`T_quinn.cnf` and `T_simple_v3_c2.cnf` are small CNF files that can be ran for testing. They are both SAT (T).
+`T_quinn.cnf` and `T_simple_v3_c2.cnf` are small CNF files that can be ran for testing. They are both SAT (T). **PLEASE RUN THESE FOR TESTING IF PROGRAM WORKS**.
 
 #### Benchmarks
 
 1. `uf20-91` has 20 literals, 91 clauses, 1000 files, all SAT (T). Use this benchmark to check for correctness.
-2. `uf50-218`, `uuf50-218` has 50 literals, 218 clauses, 1000 files, all SAT (T) and UNSAT (F) respectively. Use these benchmarks for performance information on 3-SAT problems.
-3. `benchmarks/` contains more difficult tests that may take some time to finish. Run them if you are ok with waiting a 3-48 hours.
+2. `short_bulk/uf50-218`, `short_bulk/uuf50-218` has 50 literals, 218 clauses, 1000 files, all SAT (T) and UNSAT (F) respectively. Use these benchmarks for performance information on 3-SAT problems. They should take about 15-45 minutes to run.
+3. `benchmarks/` and `samples/` contains more difficult tests that may take some time to finish. Run them if you are ok with waiting a 3-48 hours. Do not run these for now!
 
 Sources:
 [1] https://people.sc.fsu.edu/~jburkardt/data/cnf/cnf.html
